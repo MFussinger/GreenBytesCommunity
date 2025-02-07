@@ -1,10 +1,19 @@
 import axios, { AxiosError } from 'axios';
 
 export interface StoryResponse {
-  message: string;
+  message?: string;
+  text?: string;
   options?: string[];
   currentScene?: string;
   points?: number;
+  decisionId?: string;
+}
+
+export interface StoryDecision {
+  text: string;
+  timestamp: number;
+  decisionId?: string;
+  selectedOption: string;
 }
 
 export interface ErrorResponse {
@@ -24,6 +33,8 @@ Unser Herr durchschreitet das Tor und befindet sich plötzlich direkt vor einen 
 Im Portal plötzlich beschleunigte sich seine geschwindkeit und um ihn herum entstand ein Raumschiff. Dann schoss er mit dem SlipStream Antrieb durch die unendlichen Weiten eines Universums...KI steuer bitte den nächsten habitablen Planet im Äther an.`
 };
 
+const STORAGE_KEY = 'story_decisions';
+
 const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -39,24 +50,76 @@ export class InsufficientFundsError extends Error {
   }
 }
 
+function extractOptionsFromText(text: string): string[] {
+  const options: string[] = [];
+  const lines = text.split('\n');
+  
+  for (const line of lines) {
+    const match = line.match(/\d+\.\s+\*\*(.*?)\*\*/);
+    if (match && match[1]) {
+      options.push(match[1].trim());
+    }
+  }
+  
+  return options;
+}
+
+function loadStoredDecisions(): StoryDecision[] {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
+}
+
+function saveDecision(decision: StoryDecision) {
+  const decisions = loadStoredDecisions();
+  decisions.push(decision);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
+}
+
 export const storyService = {
-  async sendMessage(text: string): Promise<StoryResponse> {
+  async sendMessage(text: string, storyType?: StoryType): Promise<StoryResponse> {
     try {
-      const response = await api.post<StoryResponse>('/story', { text });
-      return response.data;
+      // Erstelle das Request-Payload basierend darauf, ob es die erste Nachricht ist
+      const payload = storyType ? {
+        text,
+        prolog: STORY_PROLOGS[storyType]  // Füge Prolog nur bei der ersten Nachricht hinzu
+      } : {
+        text
+      };
+
+      const response = await api.post<StoryResponse>('/story', payload);
+      const storyText = response.data.text || response.data.message || '';
+      const options = extractOptionsFromText(storyText);
+      
+      if (text && text.trim() !== '') {
+        saveDecision({
+          text: storyText,
+          timestamp: Date.now(),
+          decisionId: response.data.decisionId,
+          selectedOption: text
+        });
+      }
+      
+      return {
+        message: storyText,
+        options: options,
+        decisionId: response.data.decisionId
+      };
     } catch (error) {
-      // Prüfe ob es sich um einen Axios Error handelt
       if (error instanceof AxiosError && error.response?.data) {
         const errorData = error.response.data as ErrorResponse;
-        
-        // Prüfe auf "Insufficient funds" Fehler
         if (errorData.error === 'Insufficient funds') {
           throw new InsufficientFundsError();
         }
       }
-      
-      // Wenn es ein anderer Fehler ist, wirf ihn weiter
       throw error;
     }
+  },
+
+  getStoredDecisions(): StoryDecision[] {
+    return loadStoredDecisions();
+  },
+
+  resetStory() {
+    localStorage.removeItem(STORAGE_KEY);
   }
 };

@@ -18,9 +18,11 @@ interface ChatMessage {
   options?: string[];
 }
 
-interface ErrorResponse {
-  error?: string;
-}
+const formatText = (text: string): string => {
+  text = text.replace(/Wie wird unser Held weitermachen\?$/, '').trim();
+  text = text.replace(/\d+\.\s+\*\*(.*?)\*\*/g, '').trim();
+  return text;
+};
 
 const Journey: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -28,9 +30,9 @@ const Journey: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showInsufficientFundsAlert, setShowInsufficientFundsAlert] = useState(false);
+  const [isFirstMessage, setIsFirstMessage] = useState(true);
   const chatBoxRef = useRef<HTMLDivElement>(null);
 
-  // Ermittle den Story-Typ aus der URL
   const getStoryType = (): StoryType => {
     const storyId = searchParams.get('story');
     switch (storyId) {
@@ -45,14 +47,7 @@ const Journey: React.FC = () => {
     }
   };
 
-  // Auto-scroll zum neuesten Nachricht
-  useEffect(() => {
-    if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  // Zeige initial nur den Prolog an
+  // Initial nur den Prolog anzeigen
   useEffect(() => {
     const storyType = getStoryType();
     const prolog = STORY_PROLOGS[storyType];
@@ -61,6 +56,12 @@ const Journey: React.FC = () => {
       isUser: false 
     }]);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const sendMessage = async () => {
     if (inputMessage.trim() === '' || isLoading) return;
@@ -76,20 +77,29 @@ const Journey: React.FC = () => {
     setMessages(newMessages);
 
     try {
-      const response = await storyService.sendMessage(userMessage);
+      // Wenn es die erste Nachricht ist, schicke den Prolog mit
+      const response = await storyService.sendMessage(
+        userMessage,
+        isFirstMessage ? getStoryType() : undefined
+      );
+
       setMessages([
         ...newMessages,
         { 
-          text: response.message, 
+          text: formatText(response.message || ''),
           isUser: false,
           options: response.options 
         }
       ]);
+
+      // Nach der ersten erfolgreichen Nachricht setze isFirstMessage auf false
+      if (isFirstMessage) {
+        setIsFirstMessage(false);
+      }
     } catch (error) {
       if (error instanceof InsufficientFundsError) {
         setShowInsufficientFundsAlert(true);
-        // Entferne die letzte Benutzernachricht wieder
-        setMessages(messages);
+        setMessages(messages); // Entferne die letzte Benutzernachricht wieder
       } else {
         setMessages([
           ...newMessages,
@@ -123,7 +133,7 @@ const Journey: React.FC = () => {
         <div className="flex flex-col items-center">
           <div 
             ref={chatBoxRef}
-            className="w-full h-[400px] overflow-y-auto bg-black/5 rounded-lg p-4 mb-4"
+            className="w-full h-[400px] overflow-y-auto bg-black/5 rounded-lg p-4 mb-4 whitespace-pre-wrap"
           >
             {messages.map((msg, index) => (
               <div
@@ -192,7 +202,6 @@ const Journey: React.FC = () => {
         </div>
       </div>
 
-      {/* Alert Dialog für "Insufficient funds" */}
       <AlertDialog 
         open={showInsufficientFundsAlert} 
         onOpenChange={setShowInsufficientFundsAlert}
