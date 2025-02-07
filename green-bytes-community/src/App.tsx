@@ -2,16 +2,18 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import About from './pages/About';
+import Landing from './pages/landing';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
+      <div className="w-screen min-h-screen bg-gray-100">
         <Navigation />
-        <main className="container mx-auto px-4 py-8">
+        <main className="w-full">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/landing" element={<Landing />} />
           </Routes>
         </main>
       </div>

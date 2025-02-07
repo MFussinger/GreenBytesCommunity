@@ -1,31 +1,38 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [selectedBubble, setSelectedBubble] = useState<number | null>(null);
 
   const options = [
-    { id: 1, text: "Das ist Option 1" },
-    { id: 2, text: "Das ist Option 2" },
-    { id: 3, text: "Das ist Option 3" }
+    { id: 1, text: "Mittelalterliche Fantasy-Welt" },
+    { id: 2, text: "Dystopische Cyberpunk-Welt" },
+    { id: 3, text: "Tief im weiten Weltall - ganz allein?" }
   ];
 
   const handleBubbleClick = (number: number) => {
-    alert(`You selected ${number}`);
     setSelectedBubble(number);
+    setTimeout(() => {
+      navigate('/landing');
+    }, 500);
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8 p-4">
-      <h1 className="text-3xl font-bold">Willkommen</h1>
+    <div className="w-full min-h-screen flex flex-col items-center space-y-8 p-4">
+      <h1 className="text-3xl font-bold">Green Bytes Community </h1>
       
-      <div className="flex flex-col items-center gap-4 w-full max-w-2xl">
+      <div className="w-full flex flex-col items-center gap-4">
         <img 
-          src="/dein-bild.png"
+          src="/images/DATAGROUP-logo-standard.png"
           alt="DG Logo" 
-          className="w-full rounded-lg shadow-lg"
+          className="w-full max-w-4xl rounded-lg shadow-lg"
         />
-        <p className="text-center text-gray-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+        <p className="text-center text-gray-600 max-w-4xl">
+          Wähle deinen Weg um gemeinsam mit der DATAGROUP die Welt zu einem bessern Ort zu machen. 
+          Green Bytes Community ist ein interaktives TextAdventure, dass dich dabei aktiv unterstützt und motiviert die besseren Entscheidungen zu treffen.
+          Durch dein Handeln verdienst du dir Punkte, die du dazu nutzen kannst Aktionen in deinem Abenteur auszuführen.
+          Wähle ein Universum und erlebe dein eigenes individuelles Abenteuer. 
         </p>
       </div>
 
