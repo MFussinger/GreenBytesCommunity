@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainNav from '../components/MainNav';
-import { storyService, StoryType, STORY_PROLOGS } from '../services/storyService';
+import { storyService, StoryType, STORY_PROLOGS, InsufficientFundsError } from '../services/storyService';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +10,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "../components/ui/alert-dialog";
 
 interface ChatMessage {
   text: string;
@@ -77,9 +77,16 @@ const Journey: React.FC = () => {
 
     try {
       const response = await storyService.sendMessage(userMessage);
-      
-      // Prüfe auf "Insufficient funds" Fehler
-      if ((response as ErrorResponse).error === "Insufficient funds") {
+      setMessages([
+        ...newMessages,
+        { 
+          text: response.message, 
+          isUser: false,
+          options: response.options 
+        }
+      ]);
+    } catch (error) {
+      if (error instanceof InsufficientFundsError) {
         setShowInsufficientFundsAlert(true);
         // Entferne die letzte Benutzernachricht wieder
         setMessages(messages);
@@ -87,20 +94,11 @@ const Journey: React.FC = () => {
         setMessages([
           ...newMessages,
           { 
-            text: response.message, 
-            isUser: false,
-            options: response.options 
+            text: 'Es gab einen Fehler beim Senden der Nachricht. Bitte versuche es später erneut.', 
+            isUser: false 
           }
         ]);
       }
-    } catch (error) {
-      setMessages([
-        ...newMessages,
-        { 
-          text: 'Es gab einen Fehler beim Senden der Nachricht. Bitte versuche es später erneut.', 
-          isUser: false 
-        }
-      ]);
     } finally {
       setIsLoading(false);
     }

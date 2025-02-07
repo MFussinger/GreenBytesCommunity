@@ -1,10 +1,14 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export interface StoryResponse {
   message: string;
   options?: string[];
   currentScene?: string;
   points?: number;
+}
+
+export interface ErrorResponse {
+  error: string;
 }
 
 export type StoryType = 'cyberpunk' | 'fantasy' | 'space';
@@ -28,14 +32,30 @@ const api = axios.create({
   }
 });
 
+export class InsufficientFundsError extends Error {
+  constructor() {
+    super('Insufficient funds');
+    this.name = 'InsufficientFundsError';
+  }
+}
+
 export const storyService = {
   async sendMessage(text: string): Promise<StoryResponse> {
     try {
       const response = await api.post<StoryResponse>('/story', { text });
-      console.log('Story API Response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error sending message to story:', error);
+      // Prüfe ob es sich um einen Axios Error handelt
+      if (error instanceof AxiosError && error.response?.data) {
+        const errorData = error.response.data as ErrorResponse;
+        
+        // Prüfe auf "Insufficient funds" Fehler
+        if (errorData.error === 'Insufficient funds') {
+          throw new InsufficientFundsError();
+        }
+      }
+      
+      // Wenn es ein anderer Fehler ist, wirf ihn weiter
       throw error;
     }
   }
