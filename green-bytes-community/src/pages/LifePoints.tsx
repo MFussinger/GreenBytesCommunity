@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { chatService } from '../services/chatService';
+import MainNav from '../components/MainNav';
 
 interface ChatMessage {
   text: string;
@@ -61,33 +62,11 @@ const LifePoints: React.FC = () => {
   return (
     <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover flex justify-center items-center p-5">
       <div className="w-full max-w-[600px] bg-white/85 p-8 rounded-xl shadow-lg">
-        <header className="flex justify-center mb-5">
-          <Link to="/landing">
-            <img 
-              src="/images/DATAGROUP-logo-standard.png" 
-              alt="DATAGROUP Logo" 
-              className="w-[100px]"
-            />
-          </Link>
-        </header>
+        <MainNav />
 
-        <nav className="flex justify-center gap-5 mb-5">
-          <Link to="/journey" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
-            Deine Reise
-          </Link>
-          <Link to="/marketplace" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
-            Marktplatz
-          </Link>
-          <Link to="/profile" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
-            Profil
-          </Link>
-          <Link to="/lifepoints" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
-            Life Points
-          </Link>
-        </nav>
-
-        <h2 className="text-2xl text-gray-800 font-bold mb-4 text-center">Life Points</h2>
-        <div className="text-xl font-bold text-red-700 mb-5 text-center">Deine Punktzahl: 150</div>
+        <h2 className="text-2xl text-gray-800 font-bold mb-4 text-center">Punkte Chat</h2>
+        <div className="text-xl font-bold text-red-700 mb-5 text-center">Deine aktuelle Punktzahl: 150</div>
+        <div className="text-xl text-red-700 mb-5 text-center">Du kannst deine Aktion ganz einfach beschreiben  und wir vergeben Punkte in Relation zu dem Effekt auf die Umwelt.</div>
 
         <div className="flex flex-col items-center mt-4">
           <div 

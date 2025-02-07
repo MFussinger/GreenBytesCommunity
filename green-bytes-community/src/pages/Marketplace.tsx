@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { marketService, MarketItem } from '../services/marketService';
 import { Loader2 } from 'lucide-react';
+import MainNav from '../components/MainNav';
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -56,30 +57,7 @@ const Marketplace = () => {
   return (
     <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover">
       <div className="container mx-auto max-w-7xl px-4 py-8">
-        <header className="flex flex-col items-center mb-8">
-          <div className="w-40">
-            <img 
-              src="/images/DATAGROUP-logo-standard.png" 
-              alt="DATAGROUP Firmenlogo" 
-              className="w-full"
-            />
-          </div>
-        </header>
-
-        <nav className="flex justify-center gap-8 my-8">
-          <Link to="/journey" className="text-white font-bold hover:text-red-700 transition-colors">
-            Deine Reise
-          </Link>
-          <Link to="/marketplace" className="text-white font-bold hover:text-red-700 transition-colors">
-            Marktplatz
-          </Link>
-          <Link to="/profile" className="text-white font-bold hover:text-red-700 transition-colors">
-            Profil
-          </Link>
-          <Link to="/lifepoints" className="text-white font-bold hover:text-red-700 transition-colors">
-            Life Points
-          </Link>
-        </nav>
+      <MainNav />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
           {products.map((product) => (
