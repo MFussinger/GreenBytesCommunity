@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 
 interface Product {
   id: number;
-  name: string;
+  title: string;
+  userId: string;
+  createdAt: string;
+  state: 'available' | 'sold';
+  description: string;
   price: number;
-  image: string;
-  tag: string;
 }
 
 const Marketplace = () => {
@@ -15,31 +17,21 @@ const Marketplace = () => {
   const products: Product[] = [
     {
       id: 1,
-      name: "Produkt 1",
-      price: 29.99,
-      image: "/images/DATAGROUP-logo-standard.png",
-      tag: "Verfügbar in begrenzter Anzahl"
+      title: "Premium Green Bytes Paket",
+      userId: "user123",
+      createdAt: "2024-02-07",
+      state: "available",
+      description: "Das Premium Green Bytes Paket enthält exklusive Inhalte.",
+      price: 29.99
     },
     {
       id: 2,
-      name: "Produkt 2",
-      price: 49.99,
-      image: "/images/DATAGROUP-logo-standard.png",
-      tag: "Kostenlose Lieferung"
-    },
-    {
-      id: 3,
-      name: "Produkt 3",
-      price: 19.99,
-      image: "/images/DATAGROUP-logo-standard.png",
-      tag: "Jetzt bestellen!"
-    },
-    {
-      id: 4,
-      name: "Produkt 4",
-      price: 89.99,
-      image: "/images/DATAGROUP-logo-standard.png",
-      tag: "Neu eingetroffen"
+      title: "Deluxe Adventure Pack",
+      userId: "user456",
+      createdAt: "2024-02-06",
+      state: "available",
+      description: "Ein komplettes Paket für fortgeschrittene Abenteurer.",
+      price: 49.99
     }
   ];
 
@@ -76,25 +68,27 @@ const Marketplace = () => {
             <div
               key={product.id}
               className="bg-white/80 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
-              onClick={() => {
-                console.log(`Clicking product ${product.id}`);
-                navigate(`/product/${product.id}`);
-              }}
+              onClick={() => navigate(`/product/${product.id}`)}
             >
               <img
-                src={product.image}
-                alt={product.name}
+                src="/images/DATAGROUP-logo-standard.png"
+                alt={product.title}
                 className="w-full h-48 object-contain"
               />
               <div className="p-4 text-center">
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
-                  {product.name}
+                  {product.title}
                 </h3>
-                <p className="text-lg text-red-700">
+                <p className="text-sm text-gray-600 mb-2">
+                  Erstellt am: {new Date(product.createdAt).toLocaleDateString('de-DE')}
+                </p>
+                <p className="text-lg text-red-700 mb-2">
                   €{product.price.toFixed(2)}
                 </p>
-                <span className="text-sm text-gray-600 mt-2 block">
-                  {product.tag}
+                <span className={`text-sm ${
+                  product.state === 'available' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {product.state === 'available' ? 'Verfügbar' : 'Verkauft'}
                 </span>
               </div>
             </div>
