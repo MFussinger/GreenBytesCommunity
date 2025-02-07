@@ -2,9 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import About from './pages/About';
-import Landing from './pages/landing';
+import Landing from './pages/Landing';
 import Marketplace from './pages/Marketplace';
 import ProductDetails from './pages/ProductDetails';
+import LifePoints from './pages/LifePoints';
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: React.FC = () => {
             <Route path="/landing" element={<Landing />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/lifepoints" element={<LifePoints />} />
           </Routes>
         </main>
       </div>
