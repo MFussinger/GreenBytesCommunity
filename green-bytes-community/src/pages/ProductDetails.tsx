@@ -1,29 +1,63 @@
-import React from 'react';
+// src/pages/ProductDetails.tsx
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-interface Product {
-  id: number;
-  title: string;
-  userId: string;
-  createdAt: string;
-  state: 'available' | 'sold';
-  description: string;
-  price: number;
-}
+import { marketService, MarketItem } from '../services/marketService';
+import { Loader2 } from 'lucide-react';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [product, setProduct] = useState<MarketItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const product: Product = {
-    id: parseInt(id || '1'),
-    title: "Premium Green Bytes Paket",
-    userId: "user123",
-    createdAt: "2024-02-07",
-    state: "available",
-    description: "Das Premium Green Bytes Paket enthält exklusive Inhalte und Vorteile für dein Abenteuer.",
-    price: 29.99
-  };
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const items = await marketService.getItems();
+        const found = items.find(item => item.createdAt.toString() === id);
+        
+        if (found) {
+          setProduct(found);
+        } else {
+          setError('Product not found');
+        }
+      } catch (err) {
+        setError('Failed to load product details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover flex items-center justify-center">
+        <div className="bg-white/80 p-8 rounded-xl shadow-lg">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="mt-2 text-gray-600">Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover flex items-center justify-center">
+        <div className="bg-white/80 p-8 rounded-xl shadow-lg text-center">
+          <p className="text-red-600 mb-4">{error || 'Product not found'}</p>
+          <button 
+            onClick={() => navigate('/marketplace')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Back to Marketplace
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover py-12">
