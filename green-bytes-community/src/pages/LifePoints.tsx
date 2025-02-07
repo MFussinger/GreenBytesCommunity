@@ -64,7 +64,6 @@ const LifePoints: React.FC = () => {
       <div className="w-full max-w-[600px] bg-white/85 p-8 rounded-xl shadow-lg">
         <MainNav />
 
-        <h2 className="text-2xl text-gray-800 font-bold mb-4 text-center">Punkte Chat</h2>
         <div className="text-xl font-bold text-red-700 mb-5 text-center">Deine aktuelle Punktzahl: 150</div>
         <div className="text-xl text-red-700 mb-5 text-center">Du kannst deine Aktion ganz einfach beschreiben  und wir vergeben Punkte in Relation zu dem Effekt auf die Umwelt.</div>
 

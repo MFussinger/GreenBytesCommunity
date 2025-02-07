@@ -1,6 +1,13 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const MainNav = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const isActive = (path: string) => {
+    return currentPath === path ? 'text-red-700' : 'text-gray-800 hover:text-red-700';
+  };
+
   return (
     <div className="flex flex-col items-center mb-5">
       <Link to="/landing" className="mb-5">
@@ -12,17 +19,29 @@ const MainNav = () => {
       </Link>
       
       <nav className="flex justify-center gap-5">
-        <Link to="/journey" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
+        <Link 
+          to="/journey" 
+          className={`${isActive('/journey')} text-lg font-bold transition-colors`}
+        >
           Deine Reise
         </Link>
-        <Link to="/marketplace" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
+        <Link 
+          to="/marketplace" 
+          className={`${isActive('/marketplace')} text-lg font-bold transition-colors`}
+        >
           Marktplatz
         </Link>
-        <Link to="/profile" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
+        <Link 
+          to="/profile" 
+          className={`${isActive('/profile')} text-lg font-bold transition-colors`}
+        >
           Profil
         </Link>
-        <Link to="/lifepoints" className="text-gray-800 text-lg font-bold hover:text-red-700 transition-colors">
-          Life Points
+        <Link 
+          to="/lifepoints" 
+          className={`${isActive('/lifepoints')} text-lg font-bold transition-colors`}
+        >
+          Punkte Chat
         </Link>
       </nav>
     </div>
