@@ -14,7 +14,7 @@ const Home = () => {
   const handleBubbleClick = (number: number) => {
     setSelectedBubble(number);
     setTimeout(() => {
-      navigate('/landing');
+      navigate(`/landing?story=${number}`);
     }, 500);
   };
 

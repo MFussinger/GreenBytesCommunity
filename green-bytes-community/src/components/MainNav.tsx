@@ -23,7 +23,7 @@ const MainNav = () => {
           to="/journey" 
           className={`${isActive('/journey')} text-lg font-bold transition-colors`}
         >
-          Deine Reise
+          Dein Abenteuer
         </Link>
         <Link 
           to="/marketplace" 

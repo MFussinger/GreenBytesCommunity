@@ -6,6 +6,7 @@ import Landing from './pages/Landing';
 import Marketplace from './pages/Marketplace';
 import ProductDetails from './pages/ProductDetails';
 import LifePoints from './pages/LifePoints';
+import Journey from './pages/Journey';
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/lifepoints" element={<LifePoints />} />
+            <Route path="/journey" element={<Journey />} /> 
           </Routes>
         </main>
       </div>
