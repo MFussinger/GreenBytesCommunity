@@ -3,6 +3,8 @@ import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import About from './pages/About';
 import Landing from './pages/landing';
+import Marketplace from './pages/Marketplace';
+import ProductDetails from './pages/ProductDetails';
 
 const App: React.FC = () => {
   return (
@@ -14,6 +16,8 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/landing" element={<Landing />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
           </Routes>
         </main>
       </div>

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 const Landing = () => {
     return (
       <div className="min-h-screen bg-[url('/images/augen.jpg')] bg-center bg-cover flex items-center justify-center">
@@ -13,9 +14,9 @@ const Landing = () => {
               <a href="#" className="text-xl font-bold text-gray-800 hover:text-red-700 transition-colors">
                 Deine Reise
               </a>
-              <a href="#" className="text-xl font-bold text-gray-800 hover:text-red-700 transition-colors">
+              <Link to="/marketplace" className="text-xl font-bold text-gray-800 hover:text-red-700 transition-colors">
                 Marktplatz
-              </a>
+              </Link>
               <a href="#" className="text-xl font-bold text-gray-800 hover:text-red-700 transition-colors">
                 Profil
               </a>
