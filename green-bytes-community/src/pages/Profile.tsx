@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trophy, Leaf, Clock, Award } from 'lucide-react';
 import MainNav from '../components/MainNav';
+import { profileService, ProfileResponse } from '../services/profileService';
 
 interface Achievement {
   id: number;
@@ -19,11 +20,12 @@ interface Activity {
 }
 
 const Profile: React.FC = () => {
-  // Mock data - später durch API-Daten ersetzen
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Mock data für die anderen Bereiche
   const userProfile = {
-    userId: "user-42",
     username: "SustainableHero",
-    totalPoints: 315,
     level: 3,
     joinDate: "2024-01-15",
     storiesCompleted: 5,
@@ -78,6 +80,34 @@ const Profile: React.FC = () => {
     }
   ];
 
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const data = await profileService.getProfile();
+        setProfileData(data);
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover flex items-center justify-center">
+        <div className="w-full max-w-4xl bg-white/85 p-8 rounded-xl shadow-lg">
+          <MainNav />
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-pulse text-xl text-gray-600">Lade Profildaten...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[url('/images/content.jpg')] bg-center bg-cover flex items-center justify-center p-5">
       <div className="w-full max-w-4xl bg-white/85 p-8 rounded-xl shadow-lg">
@@ -100,7 +130,7 @@ const Profile: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white/80 p-4 rounded-lg shadow-md text-center">
             <Trophy className="w-8 h-8 text-red-700 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-gray-800">{userProfile.totalPoints}</p>
+            <p className="text-2xl font-bold text-gray-800">{profileData?.totalScore || 0}</p>
             <p className="text-gray-600">Gesamtpunkte</p>
           </div>
           <div className="bg-white/80 p-4 rounded-lg shadow-md text-center">
