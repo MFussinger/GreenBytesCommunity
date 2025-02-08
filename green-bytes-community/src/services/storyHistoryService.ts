@@ -15,6 +15,19 @@ const api = axios.create({
   }
 });
 
+const cleanStoryText = (text: string): string => {
+  // Entferne den "Was wirst du tun?" Teil
+  text = text.replace(/\n\nWas wirst du tun\?$/i, '');
+  
+  // Entferne die nummerierten Optionen
+  text = text.replace(/\n\n\d+\.\s+\*\*.*?\*\*/g, '');
+  
+  // Entferne überschüssige Leerzeilen am Ende
+  text = text.replace(/\n+$/, '');
+  
+  return text;
+};
+
 const extractOptionsFromText = (text: string): string[] => {
   const options: string[] = [];
   const lines = text.split('\n');
@@ -38,20 +51,37 @@ export const storyHistoryService = {
         return [];
       }
 
+      // Finde den Index der letzten System-Nachricht
+      let lastSystemMessageIndex = -1;
+      for (let i = data.length - 1; i >= 0; i--) {
+        if (i % 2 === 0) { // System-Nachricht
+          lastSystemMessageIndex = i;
+          break;
+        }
+      }
+
       // Konvertiere das Array von Strings in StoryMessage-Objekte
       return data.map((text, index) => {
         const isUserMessage = index % 2 !== 0;
         
         if (!isUserMessage) {
-          // System-Nachricht (gerade Index)
-          const options = extractOptionsFromText(text);
-          return {
-            text: text,  // Behalte den kompletten Text
-            isUser: false,
-            options: options
-          };
+          // System-Nachricht
+          if (index === lastSystemMessageIndex) {
+            // Letzte System-Nachricht: Behalte Optionen
+            return {
+              text: text,
+              isUser: false,
+              options: extractOptionsFromText(text)
+            };
+          } else {
+            // Andere System-Nachrichten: Entferne Optionen
+            return {
+              text: cleanStoryText(text),
+              isUser: false
+            };
+          }
         } else {
-          // User-Nachricht (ungerade Index)
+          // User-Nachricht
           return {
             text: text,
             isUser: true
