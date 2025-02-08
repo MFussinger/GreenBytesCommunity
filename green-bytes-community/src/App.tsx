@@ -8,6 +8,7 @@ import ProductDetails from './pages/ProductDetails';
 import LifePoints from './pages/LifePoints';
 import Journey from './pages/Journey';
 import Scoreboard from './pages/Scoreboard';
+import Profile from './pages/Profile';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <Route path="/lifepoints" element={<LifePoints />} />
             <Route path="/journey" element={<Journey />} /> 
             <Route path="/scoreboard" element={<Scoreboard />} /> 
+            <Route path="/profile" element={<Profile />} /> 
           </Routes>
         </main>
       </div>
