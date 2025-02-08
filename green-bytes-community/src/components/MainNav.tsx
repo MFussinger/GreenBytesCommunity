@@ -43,6 +43,12 @@ const MainNav = () => {
         >
           Punkte Chat
         </Link>
+        <Link 
+          to="/scoreboard" 
+          className={`${isActive('/scoreboard')} text-lg font-bold transition-colors`}
+        >
+          Scoreboard
+        </Link>
       </nav>
     </div>
   );
