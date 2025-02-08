@@ -1,10 +1,27 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import MainNav from '../components/MainNav';
+import { storyHistoryService } from '../services/storyHistoryService';
 
 const Landing = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [hasExistingStory, setHasExistingStory] = useState(false);
   const storyId = searchParams.get('story');
+
+  useEffect(() => {
+    const checkStoryHistory = async () => {
+      try {
+        const history = await storyHistoryService.getStoryHistory();
+        setHasExistingStory(history.length > 0);
+      } catch (error) {
+        console.error('Error checking story history:', error);
+        setHasExistingStory(false);
+      }
+    };
+
+    checkStoryHistory();
+  }, []);
 
   const getStoryDetails = (id: string | null) => {
     switch (id) {
@@ -72,7 +89,7 @@ const Landing = () => {
               onClick={handleStartAdventure}
               className="px-6 py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors font-bold"
             >
-              Starte dein Abenteuer
+              {hasExistingStory ? 'Spring in dein Abenteuer zurück' : 'Starte dein Abenteuer'}
             </button>
           </div>
         </div>
