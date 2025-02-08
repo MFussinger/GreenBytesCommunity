@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import { storyService, StoryType, STORY_PROLOGS, InsufficientFundsError } from '../services/storyService';
+import { profileService, ProfileResponse } from '../services/profileService';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,15 +33,24 @@ const Journey: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showInsufficientFundsAlert, setShowInsufficientFundsAlert] = useState(false);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
   const chatBoxRef = useRef<HTMLDivElement>(null);
+
+  const fetchProfileData = async () => {
+    try {
+      const data = await profileService.getProfile();
+      setProfileData(data);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  };
 
   const getStoryType = (): StoryType => {
     const storyId = searchParams.get('story');
     
-    // Wenn keine Story-ID vorhanden ist, zur Home-Page redirecten
     if (!storyId) {
       navigate('/');
-      return 'fantasy'; // Default-Rückgabe für den Zwischenzustand
+      return 'fantasy';
     }
 
     switch (storyId) {
@@ -56,20 +66,19 @@ const Journey: React.FC = () => {
     }
   };
 
-  // Prolog anzeigen und bei URL-Änderungen aktualisieren
   useEffect(() => {
     const storyType = getStoryType();
     const prolog = STORY_PROLOGS[storyType];
     
-    // Story zurücksetzen
     storyService.resetStory();
     setIsFirstMessage(true);
-    
-    // Neuen Prolog setzen
     setMessages([{ 
       text: prolog,
       isUser: false 
     }]);
+
+    // Initial profile data fetch
+    fetchProfileData();
   }, [searchParams]);
 
   useEffect(() => {
@@ -92,7 +101,6 @@ const Journey: React.FC = () => {
     setMessages(newMessages);
 
     try {
-      // Wenn es die erste Nachricht ist, schicke den Prolog mit
       const response = await storyService.sendMessage(
         userMessage,
         isFirstMessage ? getStoryType() : undefined
@@ -107,14 +115,16 @@ const Journey: React.FC = () => {
         }
       ]);
 
-      // Nach der ersten erfolgreichen Nachricht setze isFirstMessage auf false
       if (isFirstMessage) {
         setIsFirstMessage(false);
       }
+
+      // Fetch updated profile data after sending message
+      await fetchProfileData();
     } catch (error) {
       if (error instanceof InsufficientFundsError) {
         setShowInsufficientFundsAlert(true);
-        setMessages(messages); // Entferne die letzte Benutzernachricht wieder
+        setMessages(messages);
       } else {
         setMessages([
           ...newMessages,
@@ -142,7 +152,7 @@ const Journey: React.FC = () => {
         <MainNav />
         
         <div className="text-xl font-bold text-red-700 mb-5 text-center">
-          Deine aktuelle Punktzahl: 150
+          Deine aktuelle Punktzahl: {profileData?.payableScore || 0}
         </div>
 
         <div className="flex flex-col items-center">
