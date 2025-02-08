@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import { storyService, StoryType, STORY_PROLOGS, InsufficientFundsError } from '../services/storyService';
 import {
@@ -26,6 +26,7 @@ const formatText = (text: string): string => {
 
 const Journey: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +36,13 @@ const Journey: React.FC = () => {
 
   const getStoryType = (): StoryType => {
     const storyId = searchParams.get('story');
+    
+    // Wenn keine Story-ID vorhanden ist, zur Home-Page redirecten
+    if (!storyId) {
+      navigate('/');
+      return 'fantasy'; // Default-Rückgabe für den Zwischenzustand
+    }
+
     switch (storyId) {
       case '1':
         return 'fantasy';
@@ -43,14 +51,21 @@ const Journey: React.FC = () => {
       case '3':
         return 'space';
       default:
+        navigate('/');
         return 'fantasy';
     }
   };
 
-  // Initial nur den Prolog anzeigen
+  // Prolog anzeigen und bei URL-Änderungen aktualisieren
   useEffect(() => {
     const storyType = getStoryType();
     const prolog = STORY_PROLOGS[storyType];
+    
+    // Story zurücksetzen
+    storyService.resetStory();
+    setIsFirstMessage(true);
+    
+    // Neuen Prolog setzen
     setMessages([{ 
       text: prolog,
       isUser: false 

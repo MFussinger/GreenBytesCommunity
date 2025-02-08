@@ -1,8 +1,9 @@
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 
 const Landing = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const storyId = searchParams.get('story');
 
   const getStoryDetails = (id: string | null) => {
@@ -34,6 +35,14 @@ const Landing = () => {
     }
   };
 
+  const handleStartAdventure = () => {
+    if (storyId) {
+      navigate(`/journey?story=${storyId}`);
+    } else {
+      navigate('/');
+    }
+  };
+
   const story = getStoryDetails(storyId);
 
   return (
@@ -60,7 +69,7 @@ const Landing = () => {
 
           <div className="flex justify-center gap-4">
             <button 
-              onClick={() => window.location.href = '/journey'}
+              onClick={handleStartAdventure}
               className="px-6 py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors font-bold"
             >
               Starte dein Abenteuer
