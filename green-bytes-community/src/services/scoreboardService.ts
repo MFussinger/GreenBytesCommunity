@@ -3,7 +3,7 @@ import axios from 'axios';
 export interface ScoreboardEntry {
   userId: string;
   totalScore: number;
-  username?: string; // Wird später vom Backend kommen
+  username?: string;
 }
 
 const api = axios.create({
@@ -14,7 +14,7 @@ const api = axios.create({
   }
 });
 
-// Mock usernames mapping - später vom Backend
+// Konstante Usernames für die Darstellung
 const usernames: Record<string, string> = {
   'user-99': 'EcoWarrior',
   'user-36': 'GreenChampion',
@@ -22,25 +22,47 @@ const usernames: Record<string, string> = {
   'user-55': 'EarthGuardian'
 };
 
+// Fallback Usernames für neue, unbekannte User-IDs
+const fallbackUsernames = [
+  'NatureDefender',
+  'ClimateGuardian',
+  'EnviroHero',
+  'GreenInnovator',
+  'EarthProtector',
+  'SustainabilityPro',
+  'EcoChampion',
+  'PlanetSaver'
+];
+
+let fallbackUsernameIndex = 0;
+
 export const scoreboardService = {
   async getScores(): Promise<ScoreboardEntry[]> {
     try {
-      // Später der echte API call
-      const mockData = [
-        { userId: "user-99", totalScore: 40 },
-        { userId: "user-36", totalScore: 106 },
-        { userId: "user-42", totalScore: 315 },
-        { userId: "user-55", totalScore: 75 }
-      ];
-
+      const { data } = await api.get<ScoreboardEntry[]>('/scoreboard');
+      
       // Sortiere nach Punkten absteigend
-      const sortedData = mockData.sort((a, b) => b.totalScore - a.totalScore);
+      const sortedData = data.sort((a, b) => b.totalScore - a.totalScore);
       
       // Füge Usernamen hinzu
-      return sortedData.map(entry => ({
-        ...entry,
-        username: usernames[entry.userId] || 'Anonymous Player'
-      }));
+      return sortedData.map(entry => {
+        // Wenn wir einen vordefinierten Username haben, nutze diesen
+        if (usernames[entry.userId]) {
+          return {
+            ...entry,
+            username: usernames[entry.userId]
+          };
+        }
+        
+        // Sonst vergebe einen Fallback-Username
+        const fallbackUsername = fallbackUsernames[fallbackUsernameIndex];
+        fallbackUsernameIndex = (fallbackUsernameIndex + 1) % fallbackUsernames.length;
+        
+        return {
+          ...entry,
+          username: fallbackUsername
+        };
+      });
     } catch (error) {
       console.error('Error fetching scoreboard:', error);
       throw error;
