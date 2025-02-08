@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import { storyService, StoryType, STORY_PROLOGS, InsufficientFundsError } from '../services/storyService';
+import { storyHistoryService, StoryMessage } from '../services/storyHistoryService';
 import { profileService, ProfileResponse } from '../services/profileService';
 import {
   AlertDialog,
@@ -13,22 +14,10 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 
-interface ChatMessage {
-  text: string;
-  isUser: boolean;
-  options?: string[];
-}
-
-const formatText = (text: string): string => {
-  text = text.replace(/Wie wird unser Held weitermachen\?$/, '').trim();
-  text = text.replace(/\d+\.\s+\*\*(.*?)\*\*/g, '').trim();
-  return text;
-};
-
 const Journey: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<StoryMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showInsufficientFundsAlert, setShowInsufficientFundsAlert] = useState(false);
@@ -66,25 +55,45 @@ const Journey: React.FC = () => {
     }
   };
 
+  const loadStoryHistory = async () => {
+    try {
+      const history = await storyHistoryService.getStoryHistory();
+      const storyType = getStoryType();
+      
+      if (history.length === 0) {
+        // Wenn keine Historie vorhanden ist, zeige den Prolog
+        const prolog = STORY_PROLOGS[storyType];
+        setMessages([{ 
+          text: prolog,
+          isUser: false 
+        }]);
+        setIsFirstMessage(true);
+      } else {
+        // Wenn Historie vorhanden ist, zeige diese an
+        setMessages(history);
+        setIsFirstMessage(false);
+      }
+    } catch (error) {
+      console.error('Error loading story history:', error);
+      // Im Fehlerfall den Prolog anzeigen
+      const storyType = getStoryType();
+      const prolog = STORY_PROLOGS[storyType];
+      setMessages([{ 
+        text: prolog,
+        isUser: false 
+      }]);
+      setIsFirstMessage(true);
+    }
+  };
+
   useEffect(() => {
-    const storyType = getStoryType();
     const storyId = searchParams.get('story');
     
     if (storyId) {
-      // Speichere die ausgewählte Story
       localStorage.setItem('selectedStory', storyId);
     }
     
-    const prolog = STORY_PROLOGS[storyType];
-    
-    storyService.resetStory();
-    setIsFirstMessage(true);
-    setMessages([{ 
-      text: prolog,
-      isUser: false 
-    }]);
-
-    // Initial profile data fetch
+    loadStoryHistory();
     fetchProfileData();
   }, [searchParams]);
 
@@ -116,7 +125,7 @@ const Journey: React.FC = () => {
       setMessages([
         ...newMessages,
         { 
-          text: formatText(response.message || ''),
+          text: response.message || '',
           isUser: false,
           options: response.options 
         }
@@ -126,7 +135,6 @@ const Journey: React.FC = () => {
         setIsFirstMessage(false);
       }
 
-      // Fetch updated profile data after sending message
       await fetchProfileData();
     } catch (error) {
       if (error instanceof InsufficientFundsError) {
@@ -170,36 +178,34 @@ const Journey: React.FC = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-4 ${
-                  msg.isUser ? 'ml-auto text-right' : ''
-                }`}
+                className={`mb-4 ${msg.isUser ? 'flex justify-end' : 'flex justify-start'}`}
               >
                 <div
-                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                  className={`p-3 rounded-lg ${
                     msg.isUser
-                      ? 'bg-red-700 text-white'
-                      : 'bg-gray-300 text-gray-800'
+                      ? 'bg-red-700 text-white max-w-[80%]'
+                      : 'bg-gray-300 text-gray-800 max-w-[80%]'
                   }`}
                 >
-                  {msg.text}
+                  <div className="whitespace-pre-wrap">{msg.text}</div>
+                  
+                  {msg.options && msg.options.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {msg.options.map((option, optIndex) => (
+                        <button
+                          key={optIndex}
+                          onClick={() => {
+                            setInputMessage(option);
+                            sendMessage();
+                          }}
+                          className="block w-full text-left p-2 rounded bg-gray-200 hover:bg-gray-300 transition-colors text-gray-800"
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                
-                {msg.options && !msg.isUser && (
-                  <div className="mt-2 space-y-2">
-                    {msg.options.map((option, optIndex) => (
-                      <button
-                        key={optIndex}
-                        onClick={() => {
-                          setInputMessage(option);
-                          sendMessage();
-                        }}
-                        className="block w-full text-left p-2 rounded bg-gray-200 hover:bg-gray-300 transition-colors"
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
             
