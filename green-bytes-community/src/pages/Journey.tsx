@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import MainNav from '../components/MainNav';
 import { storyService, StoryType, STORY_PROLOGS, InsufficientFundsError } from '../services/storyService';
-import { storyHistoryService, StoryMessage } from '../services/storyHistoryService';
+import { storyHistoryService } from '../services/storyHistoryService';
 import { profileService, ProfileResponse } from '../services/profileService';
 import {
   AlertDialog,
@@ -17,7 +17,7 @@ import {
 const Journey: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<StoryMessage[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showInsufficientFundsAlert, setShowInsufficientFundsAlert] = useState(false);
@@ -178,34 +178,36 @@ const Journey: React.FC = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-4 ${msg.isUser ? 'flex justify-end' : 'flex justify-start'}`}
+                className={`mb-4 ${
+                  msg.isUser ? 'ml-auto text-right' : ''
+                }`}
               >
                 <div
-                  className={`p-3 rounded-lg ${
+                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
                     msg.isUser
-                      ? 'bg-red-700 text-white max-w-[80%]'
-                      : 'bg-gray-300 text-gray-800 max-w-[80%]'
+                      ? 'bg-red-700 text-white'
+                      : 'bg-gray-300 text-gray-800'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap">{msg.text}</div>
-                  
-                  {msg.options && msg.options.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      {msg.options.map((option, optIndex) => (
-                        <button
-                          key={optIndex}
-                          onClick={() => {
-                            setInputMessage(option);
-                            sendMessage();
-                          }}
-                          className="block w-full text-left p-2 rounded bg-gray-200 hover:bg-gray-300 transition-colors text-gray-800"
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {msg.text}
                 </div>
+                
+                {msg.options && !msg.isUser && (
+                  <div className="mt-2 space-y-2">
+                    {msg.options.map((option: string, optIndex: number) => (
+                      <button
+                        key={optIndex}
+                        onClick={() => {
+                          setInputMessage(option);
+                          sendMessage();
+                        }}
+                        className="block w-full text-left p-2 rounded bg-gray-200 hover:bg-gray-300 transition-colors"
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             

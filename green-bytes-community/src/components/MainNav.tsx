@@ -1,25 +1,11 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const MainNav = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => {
     return currentPath === path ? 'text-red-700' : 'text-gray-800 hover:text-red-700';
-  };
-
-  const handleJourneyClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const savedStory = localStorage.getItem('selectedStory');
-    
-    if (savedStory) {
-      // Wenn bereits eine Story ausgewählt wurde, direkt zur Journey
-      navigate(`/journey?story=${savedStory}`);
-    } else {
-      // Ansonsten zur Home-Page für Story-Auswahl
-      navigate('/');
-    }
   };
 
   return (
@@ -33,18 +19,11 @@ const MainNav = () => {
       </Link>
       
       <nav className="flex justify-center gap-5">
-        <a 
-          href="#"
-          onClick={handleJourneyClick}
-          className={`${isActive('/journey')} text-lg font-bold transition-colors cursor-pointer`}
+        <Link 
+          to="/journey" 
+          className={`${isActive('/journey')} text-lg font-bold transition-colors`}
         >
           Dein Abenteuer
-        </a>
-        <Link 
-          to="/marketplace" 
-          className={`${isActive('/marketplace')} text-lg font-bold transition-colors`}
-        >
-          Marktplatz
         </Link>
         <Link 
           to="/profile" 
@@ -56,7 +35,7 @@ const MainNav = () => {
           to="/lifepoints" 
           className={`${isActive('/lifepoints')} text-lg font-bold transition-colors`}
         >
-          Aktions-Chat
+          Punkte Chat
         </Link>
         <Link 
           to="/scoreboard" 
