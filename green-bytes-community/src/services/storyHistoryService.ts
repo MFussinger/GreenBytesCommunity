@@ -16,11 +16,14 @@ const api = axios.create({
 });
 
 const cleanStoryText = (text: string): string => {
-  // Entferne den "Was wirst du tun?" Teil
-  text = text.replace(/\n\nWas wirst du tun\?$/i, '');
+  // Entferne den kompletten Optionen-Block inklusive Einleitung
+  text = text.replace(/(?:die KI dir mehrere Optionen anbietet:)[\s\S]*$/, '');
   
-  // Entferne die nummerierten Optionen
-  text = text.replace(/\n\n\d+\.\s+\*\*.*?\*\*/g, '');
+  // Alternative Einleitungen für Optionen falls vorhanden
+  text = text.replace(/(?:Deine Optionen sind:)[\s\S]*$/, '');
+  text = text.replace(/(?:Du hast folgende Optionen:)[\s\S]*$/, '');
+  text = text.replace(/(?:Du hast die Wahl:)[\s\S]*$/, '');
+  text = text.replace(/(?:Du hast folgende Entscheidungen:)[\s\S]*$/, '');
   
   // Entferne überschüssige Leerzeilen am Ende
   text = text.replace(/\n+$/, '');
