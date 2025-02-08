@@ -1,9 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { storyHistoryService } from '../services/storyHistoryService';
 
 const Home = () => {
   const navigate = useNavigate();
   const [selectedBubble, setSelectedBubble] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkExistingStory = async () => {
+      try {
+        const history = await storyHistoryService.getStoryHistory();
+        if (history.length > 0) {
+          // Prüfe, ob eine gespeicherte Story-ID existiert
+          const savedStory = localStorage.getItem('selectedStory');
+          if (savedStory) {
+            navigate(`/landing?story=${savedStory}`);
+          } else {
+            // Fallback zur Landing-Page ohne Story-ID
+            navigate('/landing');
+          }
+          return;
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error checking story history:', error);
+        setIsLoading(false);
+      }
+    };
+
+    checkExistingStory();
+  }, [navigate]);
 
   const options = [
     { 
@@ -30,6 +57,14 @@ const Home = () => {
     setSelectedBubble(number);
     navigate(`/landing?story=${number}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-xl text-gray-600">Lade...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center space-y-8 p-4 bg-gray-100">
@@ -66,10 +101,8 @@ const Home = () => {
               className="w-full h-64 object-cover"
             />
             
-            {/* Overlay mit Verlauf für bessere Lesbarkeit */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20" />
             
-            {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
               <div className="flex items-center gap-4 mb-3">
                 <div className={`
