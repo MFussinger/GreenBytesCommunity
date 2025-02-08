@@ -68,6 +68,13 @@ const Journey: React.FC = () => {
 
   useEffect(() => {
     const storyType = getStoryType();
+    const storyId = searchParams.get('story');
+    
+    if (storyId) {
+      // Speichere die ausgewählte Story
+      localStorage.setItem('selectedStory', storyId);
+    }
+    
     const prolog = STORY_PROLOGS[storyType];
     
     storyService.resetStory();
