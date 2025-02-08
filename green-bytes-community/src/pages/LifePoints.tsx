@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { chatService } from '../services/chatService';
+import { profileService, ProfileResponse } from '../services/profileService';
 import MainNav from '../components/MainNav';
 
 interface ChatMessage {
@@ -10,10 +11,26 @@ interface ChatMessage {
 
 const LifePoints: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { text: 'Hallo!  Erzähle mir, was du für die Umwelt getan 😊', isUser: false }
+    { text: 'Hallo! Erzähle mir, was du für die Umwelt getan 😊', isUser: false }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
   const chatBoxRef = useRef<HTMLDivElement>(null);
+
+  const fetchProfileData = async () => {
+    try {
+      const data = await profileService.getProfile();
+      setProfileData(data);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Initial profile data fetch
+    fetchProfileData();
+  }, []);
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -22,13 +39,14 @@ const LifePoints: React.FC = () => {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (inputMessage.trim() === '') return;
+    if (inputMessage.trim() === '' || isLoading) return;
 
     const newMessages = [
       ...messages,
       { text: inputMessage, isUser: true }
     ];
     setMessages(newMessages);
+    setIsLoading(true);
     
     try {
       const response = await chatService.sendMessage(inputMessage);
@@ -36,14 +54,18 @@ const LifePoints: React.FC = () => {
         ...newMessages,
         { text: `Punkte: ${response.score}\n\n${response.scoreReason}`, isUser: false }
       ]);
+
+      // Fetch updated profile data after successful message
+      await fetchProfileData();
     } catch (error) {
       setMessages([
         ...newMessages,
         { text: 'Es gab einen Fehler beim Senden der Nachricht.', isUser: false }
       ]);
+    } finally {
+      setIsLoading(false);
+      setInputMessage('');
     }
-    
-    setInputMessage('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -64,8 +86,12 @@ const LifePoints: React.FC = () => {
       <div className="w-full max-w-[600px] bg-white/85 p-8 rounded-xl shadow-lg">
         <MainNav />
 
-        <div className="text-xl font-bold text-red-700 mb-5 text-center">Deine aktuelle Punktzahl: 150</div>
-        <div className="text-xl text-red-700 mb-5 text-center">Du kannst deine Aktion ganz einfach beschreiben  und wir vergeben Punkte in Relation zu dem Effekt auf die Umwelt.</div>
+        <div className="text-xl font-bold text-red-700 mb-5 text-center">
+          Deine aktuelle Punktzahl: {profileData?.payableScore || 0}
+        </div>
+        <div className="text-xl text-red-700 mb-5 text-center">
+          Du kannst deine Aktion ganz einfach beschreiben und wir vergeben Punkte in Relation zu dem Effekt auf die Umwelt.
+        </div>
 
         <div className="flex flex-col items-center mt-4">
           <div 
@@ -84,6 +110,11 @@ const LifePoints: React.FC = () => {
                 {msg.text}
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-center items-center py-2">
+                <div className="animate-pulse text-gray-600">Lädt...</div>
+              </div>
+            )}
           </div>
 
           <input
@@ -93,11 +124,15 @@ const LifePoints: React.FC = () => {
             onKeyPress={handleKeyPress}
             placeholder="Schreibe eine Nachricht..."
             className="w-full p-2.5 text-base border-2 border-red-700 rounded-lg mb-2.5"
+            disabled={isLoading}
           />
           
           <button
             onClick={sendMessage}
-            className="w-full p-3 text-base text-white bg-red-700 border-none rounded-lg cursor-pointer hover:bg-red-800 transition-colors mb-5"
+            disabled={isLoading}
+            className={`w-full p-3 text-base text-white bg-red-700 border-none rounded-lg cursor-pointer transition-colors mb-5 ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-800'
+            }`}
           >
             Senden
           </button>
