@@ -56,7 +56,7 @@ const MainNav = () => {
           to="/lifepoints" 
           className={`${isActive('/lifepoints')} text-lg font-bold transition-colors`}
         >
-          Punkte Chat
+          Aktions-Chat
         </Link>
         <Link 
           to="/scoreboard" 
